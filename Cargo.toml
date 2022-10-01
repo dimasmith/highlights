@@ -7,3 +7,5 @@ description = "Convert kindle highlights into different formats"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+serde = { version = "1.0.144", features = ["derive"] }
+serde_json = "1.0.85"
