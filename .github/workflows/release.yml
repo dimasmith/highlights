@@ -1,0 +1,14 @@
+name: Release
+on:
+  release:
+    types:
+      - prereleased
+jobs:
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/cargo@v1
+        with:
+          command: package
