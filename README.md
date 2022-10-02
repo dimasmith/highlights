@@ -12,7 +12,7 @@ more suitable for placing into note-taking software.
 ## Usage
 
 ```shell
-highlight [input] <output>
+highlights [input] <output>
 ```
 
 ### Examples
@@ -20,13 +20,13 @@ highlight [input] <output>
 Read highlights from the bookcision json file and render to the output stream.
 
 ```shell
-highlight input.json
+highlights input.json
 ```
 
 Read highlights from the bookcision json file and render to the file.
 
 ```shell
-example kasparov.json kasparov.md
+highlights kasparov.json kasparov.md
 ```
 
 ## Supported output formats
