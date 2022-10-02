@@ -6,6 +6,7 @@ use highlights::input::bookcision::JsonBook;
 use highlights::input::HighlightsRead;
 use highlights::render::markdown::MarkdownRenderer;
 use highlights::render::Render;
+use highlights::HighlightError;
 
 mod io;
 
@@ -20,14 +21,16 @@ struct Cli {
     target: Option<PathBuf>,
 }
 
-fn main() -> std::io::Result<()> {
+fn main() -> Result<(), HighlightError> {
     let cli = Cli::parse();
 
     let mut input = io::input(cli.source);
-    let book = JsonBook::from_reader(&mut input).unwrap().into();
+    let book = JsonBook::from_reader(&mut input)?.into();
 
     let mut out = io::output(cli.target);
 
     let mut renderer = MarkdownRenderer::default();
-    renderer.render(&book, &mut out)
+    renderer
+        .render(&book, &mut out)
+        .map_err(HighlightError::from)
 }

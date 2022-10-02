@@ -3,6 +3,7 @@ use std::io::Write;
 
 use crate::highlights::{Book, Highlight};
 use crate::render::Render;
+use crate::HighlightError;
 
 /// Renders the book into markdown format using supplied writer.
 ///
@@ -85,11 +86,11 @@ impl Render for MarkdownRenderer {
     /// let mut renderer = MarkdownRenderer::default();
     /// renderer.render(&mut book, &mut out).unwrap();
     /// ```
-    fn render<W>(&mut self, book: &Book, out: &mut W) -> std::io::Result<()>
+    fn render<W>(&mut self, book: &Book, out: &mut W) -> Result<(), HighlightError>
     where
         W: Write,
     {
-        render_book(book, out)
+        render_book(book, out).map_err(HighlightError::from)
     }
 }
 
