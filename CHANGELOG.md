@@ -5,6 +5,7 @@
 ### Added
 
 - Render notes and comments
+- Add CLI description and help
 
 ## [0.1.0] - 2022-10-02
 
