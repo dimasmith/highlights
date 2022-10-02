@@ -20,10 +20,7 @@ use crate::HighlightError;
 /// render_book(&mut book, &mut writer).unwrap();
 /// ```
 /// Produces the markdown output of the example book into the standard output.
-pub fn render_book<W>(book: &Book, w: &mut W) -> std::io::Result<()>
-where
-    W: Write,
-{
+pub fn render_book(book: &Book, w: impl Write) -> std::io::Result<()> {
     let mut md = MarkdownWriter::new(w);
     md.heading(book.title())?;
     md.lf()?;
@@ -86,10 +83,7 @@ impl Render for MarkdownRenderer {
     /// let mut renderer = MarkdownRenderer::default();
     /// renderer.render(&mut book, &mut out).unwrap();
     /// ```
-    fn render<W>(&mut self, book: &Book, out: &mut W) -> Result<(), HighlightError>
-    where
-        W: Write,
-    {
+    fn render(&mut self, book: &Book, out: impl Write) -> Result<(), HighlightError> {
         render_book(book, out).map_err(HighlightError::from)
     }
 }

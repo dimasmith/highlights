@@ -35,12 +35,10 @@ fn main() {
 fn convert_highlights() -> Result<(), HighlightError> {
     let cli = Cli::parse();
 
-    let mut input = io::input(cli.source)?;
-    let book = JsonBook::from_reader(&mut input)?.into();
+    let input = io::input(cli.source)?;
+    let book = JsonBook::from_reader(input)?.into();
 
-    let mut out = io::output(cli.target)?;
+    let out = io::output(cli.target)?;
     let mut renderer = MarkdownRenderer::default();
-    renderer
-        .render(&book, &mut out)
-        .map_err(HighlightError::from)
+    renderer.render(&book, out)
 }
