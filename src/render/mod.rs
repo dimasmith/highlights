@@ -1,13 +1,15 @@
 //! Rendering abstraction to export highlights.
-use crate::highlights::Book;
 use std::io::{BufWriter, Write};
+
+use crate::highlights::Book;
+use crate::HighlightError;
 
 pub mod markdown;
 
 /// Render format to export book highlights.
 pub trait Render {
     /// Render book into specified output.
-    fn render<W>(&mut self, book: &Book, out: &mut W) -> std::io::Result<()>
+    fn render<W>(&mut self, book: &Book, out: &mut W) -> Result<(), HighlightError>
     where
         W: Write;
 

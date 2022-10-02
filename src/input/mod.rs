@@ -1,8 +1,8 @@
 //! Various input formats to read highlights from.
-use std::error::Error;
 use std::io::Read;
 
 use crate::highlights::Book;
+use crate::HighlightError;
 
 pub mod bookcision;
 
@@ -11,7 +11,7 @@ pub mod bookcision;
 /// Each read object is guaranteed to be convertable to book highlights.
 pub trait HighlightsRead: Into<Book> {
     /// Creates highlights from the input source.
-    fn from_reader<R>(reader: &mut R) -> Result<Self, Box<dyn Error>>
+    fn from_reader<R>(reader: &mut R) -> Result<Self, HighlightError>
     where
         R: Read;
 }

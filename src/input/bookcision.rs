@@ -1,12 +1,13 @@
 //! Import highlights from bookcision json format.
 
-use std::error::Error;
 use std::io::Read;
 
 use serde::{Deserialize, Serialize};
+use serde_json::error::Error;
 
 use crate::highlights::{Book, Highlight, Location};
 use crate::input::HighlightsRead;
+use crate::HighlightError;
 
 /// JSON representation of bookcision kindle highlights export.
 #[derive(Serialize, Deserialize, Debug)]
@@ -57,12 +58,18 @@ impl From<&JsonHighlight> for Highlight {
 }
 
 impl HighlightsRead for JsonBook {
-    fn from_reader<R>(reader: &mut R) -> Result<Self, Box<dyn Error>>
+    fn from_reader<R>(reader: &mut R) -> Result<Self, HighlightError>
     where
         R: Read,
     {
-        let b = serde_json::from_reader(reader)?;
+        let b: JsonBook = serde_json::from_reader(reader).map_err(HighlightError::from)?;
         Ok(b)
+    }
+}
+
+impl From<Error> for HighlightError {
+    fn from(e: Error) -> Self {
+        HighlightError::Delegated(Box::new(e))
     }
 }
 
