@@ -69,7 +69,7 @@ impl HighlightsRead for JsonBook {
 
 impl From<Error> for HighlightError {
     fn from(e: Error) -> Self {
-        HighlightError::Delegated(Box::new(e))
+        HighlightError::IOError(std::io::Error::from(e))
     }
 }
 

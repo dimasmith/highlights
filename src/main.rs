@@ -21,14 +21,24 @@ struct Cli {
     target: Option<PathBuf>,
 }
 
-fn main() -> Result<(), HighlightError> {
+fn main() {
+    let result = convert_highlights();
+    match result {
+        Ok(_) => {}
+        Err(err) => {
+            eprintln!("{}", err);
+            std::process::exit(74);
+        }
+    }
+}
+
+fn convert_highlights() -> Result<(), HighlightError> {
     let cli = Cli::parse();
 
-    let mut input = io::input(cli.source);
+    let mut input = io::input(cli.source)?;
     let book = JsonBook::from_reader(&mut input)?.into();
 
-    let mut out = io::output(cli.target);
-
+    let mut out = io::output(cli.target)?;
     let mut renderer = MarkdownRenderer::default();
     renderer
         .render(&book, &mut out)

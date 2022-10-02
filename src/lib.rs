@@ -8,7 +8,6 @@ pub mod render;
 #[derive(Debug)]
 pub enum HighlightError {
     Unknown(String),
-    Delegated(Box<dyn Error>),
     IOError(std::io::Error),
 }
 
@@ -17,12 +16,18 @@ impl Display for HighlightError {
         match self {
             HighlightError::Unknown(message) => f.write_str(message),
             HighlightError::IOError(err) => f.write_fmt(format_args!("{}", err)),
-            HighlightError::Delegated(err) => f.write_fmt(format_args!("{}", err)),
         }
     }
 }
 
-impl Error for HighlightError {}
+impl Error for HighlightError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            HighlightError::IOError(err) => Some(err),
+            HighlightError::Unknown(_) => None,
+        }
+    }
+}
 
 impl Default for HighlightError {
     fn default() -> Self {
