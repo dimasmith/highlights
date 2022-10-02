@@ -9,9 +9,7 @@ pub mod markdown;
 /// Render format to export book highlights.
 pub trait Render {
     /// Render book into specified output.
-    fn render<W>(&mut self, book: &Book, out: &mut W) -> Result<(), HighlightError>
-    where
-        W: Write;
+    fn render(&mut self, book: &Book, out: impl Write) -> Result<(), HighlightError>;
 
     /// Renders book highlights into the string.
     ///

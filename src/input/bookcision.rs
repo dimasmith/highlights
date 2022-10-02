@@ -58,10 +58,7 @@ impl From<&JsonHighlight> for Highlight {
 }
 
 impl HighlightsRead for JsonBook {
-    fn from_reader<R>(reader: &mut R) -> Result<Self, HighlightError>
-    where
-        R: Read,
-    {
+    fn from_reader(reader: impl Read) -> Result<Self, HighlightError> {
         let b: JsonBook = serde_json::from_reader(reader).map_err(HighlightError::from)?;
         Ok(b)
     }
