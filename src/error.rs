@@ -4,15 +4,23 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub enum HighlightError {
-    Unknown(String),
-    IOError(std::io::Error),
+    General(String),
+    IOError(String, std::io::Error),
+}
+
+impl HighlightError {
+    pub fn new(message: impl Into<String>, io_error: std::io::Error) -> Self {
+        HighlightError::IOError(message.into(), io_error)
+    }
 }
 
 impl Display for HighlightError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            HighlightError::Unknown(message) => f.write_str(message),
-            HighlightError::IOError(err) => f.write_fmt(format_args!("{}", err)),
+            HighlightError::General(message) => f.write_str(message),
+            HighlightError::IOError(message, err) => {
+                f.write_fmt(format_args!("{}\n\t{}", message, err))
+            }
         }
     }
 }
@@ -20,20 +28,14 @@ impl Display for HighlightError {
 impl Error for HighlightError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
-            HighlightError::IOError(err) => Some(err),
-            HighlightError::Unknown(_) => None,
+            HighlightError::IOError(_, err) => Some(err),
+            HighlightError::General(_) => None,
         }
     }
 }
 
 impl Default for HighlightError {
     fn default() -> Self {
-        HighlightError::Unknown("unknown error".to_owned())
-    }
-}
-
-impl From<std::io::Error> for HighlightError {
-    fn from(io_error: std::io::Error) -> Self {
-        HighlightError::IOError(io_error)
+        HighlightError::General("unknown error".to_owned())
     }
 }

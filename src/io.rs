@@ -6,8 +6,11 @@ use highlights::error::HighlightError;
 
 pub fn output(out_arg: Option<PathBuf>) -> Result<Box<dyn Write>, HighlightError> {
     match out_arg {
-        Some(path) => {
-            let output_file = File::create(path).map_err(HighlightError::from)?;
+        Some(path_buf) => {
+            let path = path_buf.as_path();
+            let output_file = File::create(path).map_err(|e| {
+                HighlightError::new(format!("cannot write to file: {}", path.display()), e)
+            })?;
             Ok(Box::new(output_file))
         }
         None => Ok(Box::new(stdout())),
@@ -16,8 +19,11 @@ pub fn output(out_arg: Option<PathBuf>) -> Result<Box<dyn Write>, HighlightError
 
 pub fn input(in_arg: Option<PathBuf>) -> Result<Box<dyn Read>, HighlightError> {
     match in_arg {
-        Some(path) => {
-            let input_file = File::open(path).map_err(HighlightError::from)?;
+        Some(path_buf) => {
+            let path = path_buf.as_path();
+            let input_file = File::open(path).map_err(|e| {
+                HighlightError::new(format!("cannot read input file: {}", path.display()), e)
+            })?;
             Ok(Box::new(input_file))
         }
         None => Ok(Box::new(stdin())),
