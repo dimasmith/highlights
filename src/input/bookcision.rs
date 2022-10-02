@@ -5,9 +5,9 @@ use std::io::Read;
 use serde::{Deserialize, Serialize};
 use serde_json::error::Error;
 
+use crate::error::HighlightError;
 use crate::highlights::{Book, Highlight, Location};
 use crate::input::HighlightsRead;
-use crate::HighlightError;
 
 /// JSON representation of bookcision kindle highlights export.
 #[derive(Serialize, Deserialize, Debug)]

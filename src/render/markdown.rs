@@ -1,9 +1,9 @@
 //! Markdown format rendering for book highlights.
 use std::io::Write;
 
+use crate::error::HighlightError;
 use crate::highlights::{Book, Highlight};
 use crate::render::Render;
-use crate::HighlightError;
 
 /// Renders the book into markdown format using supplied writer.
 ///

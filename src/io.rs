@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{stdin, stdout, Read, Write};
 use std::path::PathBuf;
 
-use highlights::HighlightError;
+use highlights::error::HighlightError;
 
 pub fn output(out_arg: Option<PathBuf>) -> Result<Box<dyn Write>, HighlightError> {
     match out_arg {

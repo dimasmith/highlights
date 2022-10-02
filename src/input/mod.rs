@@ -1,8 +1,8 @@
 //! Various input formats to read highlights from.
 use std::io::Read;
 
+use crate::error::HighlightError;
 use crate::highlights::Book;
-use crate::HighlightError;
 
 pub mod bookcision;
 
