@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Messages and exit codes for errors
+
 ## [0.2.0] - 2022-10-02
 
 ### Added
