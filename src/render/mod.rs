@@ -1,8 +1,8 @@
 //! Rendering abstraction to export highlights.
 use std::io::{BufWriter, Write};
 
+use crate::error::HighlightError;
 use crate::highlights::Book;
-use crate::HighlightError;
 
 pub mod markdown;
 

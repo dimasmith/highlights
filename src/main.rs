@@ -2,11 +2,11 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
+use highlights::error::HighlightError;
 use highlights::input::bookcision::JsonBook;
 use highlights::input::HighlightsRead;
 use highlights::render::markdown::MarkdownRenderer;
 use highlights::render::Render;
-use highlights::HighlightError;
 
 mod io;
 
