@@ -3,7 +3,6 @@
 use std::io::Read;
 
 use serde::{Deserialize, Serialize};
-use serde_json::error::Error;
 
 use crate::error::HighlightError;
 use crate::highlights::{Book, Highlight, Location};
@@ -59,14 +58,10 @@ impl From<&JsonHighlight> for Highlight {
 
 impl HighlightsRead for JsonBook {
     fn from_reader(reader: impl Read) -> Result<Self, HighlightError> {
-        let b: JsonBook = serde_json::from_reader(reader).map_err(HighlightError::from)?;
+        let b: JsonBook = serde_json::from_reader(reader).map_err(|e| {
+            HighlightError::new("invalid bookcision json file", std::io::Error::from(e))
+        })?;
         Ok(b)
-    }
-}
-
-impl From<Error> for HighlightError {
-    fn from(e: Error) -> Self {
-        HighlightError::IOError(std::io::Error::from(e))
     }
 }
 
