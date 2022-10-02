@@ -9,6 +9,14 @@ into some readable format for revisiting it later.
 The `highlights` utility is created to convert exported highlights to other formats
 more suitable for placing into note-taking software.
 
+## Installation
+
+Use cargo to install the `highlights` tool locally:
+
+```shell
+cargo install highlights
+```
+
 ## Usage
 
 ```shell
