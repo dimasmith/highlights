@@ -12,7 +12,7 @@ mod io;
 #[derive(Parser)]
 #[command(name = "highlights")]
 #[command(about = "Convert kindle highlights to markdown")]
-#[command(version = "v0.1.1-dev")]
+#[command(version = "v0.2.0")]
 struct Cli {
     #[arg(help = "input file")]
     source: Option<PathBuf>,
