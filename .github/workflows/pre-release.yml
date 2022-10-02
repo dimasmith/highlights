@@ -4,8 +4,8 @@ on:
     types:
       - prereleased
 jobs:
-  package:
-    name: Package
+  dryRun:
+    name: Dry Run
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
