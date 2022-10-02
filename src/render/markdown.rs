@@ -1,7 +1,8 @@
 //! Markdown format rendering for book highlights.
+use std::io::Write;
+
 use crate::highlights::Book;
 use crate::render::Render;
-use std::io::Write;
 
 /// Renders the book into markdown format using supplied writer.
 ///
@@ -75,20 +76,57 @@ impl Default for MarkdownRenderer {
     }
 }
 
+#[allow(dead_code)]
+struct MarkdownWriter<W> {
+    writer: W,
+}
+
+#[allow(dead_code)]
+impl<W> MarkdownWriter<W>
+where
+    W: Write,
+{
+    fn new(writer: W) -> Self {
+        MarkdownWriter { writer }
+    }
+
+    fn heading(&mut self, title: &str) -> std::io::Result<()> {
+        self.writer.write_fmt(format_args!("# {}\n", title))
+    }
+
+    fn blockquote(&mut self, quote: &str) -> std::io::Result<()> {
+        self.writer.write_fmt(format_args!("> {}\n", quote))
+    }
+
+    fn text(&mut self, text: &str) -> std::io::Result<()> {
+        self.writer.write_fmt(format_args!("{}\n", text))
+    }
+
+    fn italic(&mut self, text: &str) -> std::io::Result<()> {
+        self.writer.write_fmt(format_args!("*{}*\n", text))
+    }
+
+    fn link(&mut self, title: &str, url: &str) -> std::io::Result<()> {
+        self.writer
+            .write_fmt(format_args!("[{}]({})\n", title, url))
+    }
+
+    fn line(&mut self) -> std::io::Result<()> {
+        self.writer.write_all("---\n".as_bytes())
+    }
+
+    fn lf(&mut self) -> std::io::Result<()> {
+        self.writer.write_all("\n".as_bytes())
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use std::io::BufWriter;
+
     use crate::highlights::{Highlight, Location};
 
-    #[test]
-    fn render_book_title() {
-        let new_book = Book::new("title", "author", []);
-
-        let markdown = render_markdown(&new_book);
-
-        assert!(markdown.contains("# title"));
-        assert!(markdown.contains("*by author*"));
-    }
+    use super::*;
 
     #[test]
     fn render_highlights() {
@@ -114,5 +152,69 @@ mod tests {
     fn render_markdown(new_book: &Book) -> String {
         let mut renderer = MarkdownRenderer::default();
         renderer.as_string(new_book)
+    }
+
+    #[test]
+    fn render_heading() {
+        let mut buf = BufWriter::new(Vec::new());
+        let mut md = MarkdownWriter::new(&mut buf);
+
+        md.heading("Book Title").unwrap();
+
+        let markdown = stringify(buf);
+        assert_eq!(markdown, "# Book Title\n");
+    }
+
+    #[test]
+    fn render_blockquote() {
+        let mut buf = BufWriter::new(Vec::new());
+        let mut md = MarkdownWriter::new(&mut buf);
+
+        md.blockquote("This is rather nice quote I want to highlight")
+            .unwrap();
+
+        let markdown = stringify(buf);
+        assert_eq!(
+            markdown,
+            "> This is rather nice quote I want to highlight\n"
+        );
+    }
+
+    #[test]
+    fn render_text() {
+        let mut buf = BufWriter::new(Vec::new());
+        let mut md = MarkdownWriter::new(&mut buf);
+
+        md.text("Just a plain text").unwrap();
+
+        let markdown = stringify(buf);
+        assert_eq!(markdown, "Just a plain text\n");
+    }
+
+    #[test]
+    fn render_line() {
+        let mut buf = BufWriter::new(Vec::new());
+        let mut md = MarkdownWriter::new(&mut buf);
+
+        md.line().unwrap();
+
+        let markdown = stringify(buf);
+        assert_eq!(markdown, "---\n");
+    }
+
+    #[test]
+    fn render_lf() {
+        let mut buf = BufWriter::new(Vec::new());
+        let mut md = MarkdownWriter::new(&mut buf);
+
+        md.lf().unwrap();
+
+        let markdown = stringify(buf);
+        assert_eq!(markdown, "\n");
+    }
+
+    fn stringify(buffer: BufWriter<Vec<u8>>) -> String {
+        let bytes = buffer.into_inner().unwrap();
+        String::from_utf8(bytes).unwrap()
     }
 }
