@@ -84,7 +84,7 @@ impl Render for MarkdownRenderer {
     /// renderer.render(&mut book, &mut out).unwrap();
     /// ```
     fn render(&mut self, book: &Book, out: impl Write) -> Result<(), HighlightError> {
-        render_book(book, out).map_err(|e| HighlightError::new("cannot write markdown notes", e))
+        render_book(book, out).map_err(|e| HighlightError::io("cannot write markdown notes", e))
     }
 }
 
