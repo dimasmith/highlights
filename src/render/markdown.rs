@@ -1,7 +1,7 @@
 //! Markdown format rendering for book highlights.
 use std::io::Write;
 
-use crate::highlights::Book;
+use crate::highlights::{Book, Highlight};
 use crate::render::Render;
 
 /// Renders the book into markdown format using supplied writer.
@@ -23,22 +23,45 @@ pub fn render_book<W>(book: &Book, w: &mut W) -> std::io::Result<()>
 where
     W: Write,
 {
-    w.write_fmt(format_args!("# {}", book.title()))?;
-    w.write_all("\n\n".as_bytes())?;
-    w.write_fmt(format_args!("*by {}*", book.authors()))?;
-    w.write_all("\n\n".as_bytes())?;
+    let mut md = MarkdownWriter::new(w);
+    md.heading(book.title())?;
+    md.lf()?;
+    let authors = format_args!("by {}", book.authors()).to_string();
+    md.italic(&authors)?;
+    md.lf()?;
 
     let highlights = book.highlights();
     for highlight in highlights {
-        w.write_fmt(format_args!("> {}", highlight.text()))?;
-        w.write_all("\n> \n".as_bytes())?;
+        md.lf()?;
+        md.line()?;
+        match &highlight {
+            Highlight::Quote {
+                quote: quote_text,
+                location: _,
+            } => {
+                md.blockquote(quote_text)?;
+            }
+            Highlight::Note {
+                note: note_text,
+                location: _,
+            } => {
+                md.text(note_text)?;
+            }
+            Highlight::Comment {
+                quote: quote_text,
+                note: note_text,
+                location: _,
+            } => {
+                md.blockquote(quote_text)?;
+                md.lf()?;
+                md.text(note_text)?;
+            }
+        }
+
+        md.lf()?;
         let location = highlight.location();
-        w.write_fmt(format_args!(
-            "> [Location {}]({})",
-            location.value(),
-            location.link()
-        ))?;
-        w.write_all("\n\n".as_bytes())?;
+        let name = format_args!("Location {}", location.value()).to_string();
+        md.link(&name, location.link())?;
     }
 
     Ok(())
@@ -76,12 +99,10 @@ impl Default for MarkdownRenderer {
     }
 }
 
-#[allow(dead_code)]
 struct MarkdownWriter<W> {
     writer: W,
 }
 
-#[allow(dead_code)]
 impl<W> MarkdownWriter<W>
 where
     W: Write,
@@ -124,29 +145,22 @@ where
 mod tests {
     use std::io::BufWriter;
 
-    use crate::highlights::{Highlight, Location};
+    use crate::highlights::examples;
 
     use super::*;
 
     #[test]
     fn render_highlights() {
-        let new_book = Book::new(
-            "other title",
-            "new author",
-            [
-                Highlight::new("highlight 1", Location::new(1, "loc1")),
-                Highlight::new("highlight 2", Location::new(2, "loc2")),
-            ],
-        );
+        let chess_book = examples::chess_book();
 
-        let markdown = render_markdown(&new_book);
+        let markdown = render_markdown(&chess_book);
 
-        assert!(markdown.contains("# other title"));
-        assert!(markdown.contains("*by new author*"));
-        assert!(markdown.contains("> highlight 1"));
-        assert!(markdown.contains("> [Location 1](loc1)"));
-        assert!(markdown.contains("> highlight 2"));
-        assert!(markdown.contains("> [Location 2](loc2)"));
+        assert!(markdown.contains("# How Life"));
+        assert!(markdown.contains("*by Garry Kasparov*"));
+        assert!(markdown.contains("> the reality is"));
+        assert!(markdown.contains("[Location 157]"));
+        assert!(markdown.contains("Create a personalized map"));
+        assert!(markdown.contains("[Location 294]"));
     }
 
     fn render_markdown(new_book: &Book) -> String {

@@ -7,16 +7,19 @@ pub fn chess_book() -> Book {
         "How Life Imitates Chess: Making the Right Moves, from the Board to the Boardroom",
         "Garry Kasparov",
         [
-            Highlight::new(
+            Highlight::quote(
                 "the reality is that we discard our decisions almost as soon as we make them",
-                Location::new(157, "kindle://book?action=open&asin=B0049U443Q&location=157",
-                ),
+                Location::new(157, "kindle://book?action=open&asin=B0049U443Q&location=157"),
             ),
-            Highlight::new(
+            Highlight::note(
                 "Create a personalized map of your decision-making process",
-                Location::new(294, "kindle://book?action=open&asin=B0049U443Q&location=294")),
-            Highlight::new(
+                Location::new(294, "kindle://book?action=open&asin=B0049U443Q&location=294"),
+            ),
+            Highlight::comment(
+                "Drawing it as an actual map might be fun",
                 "The map tells you which areas of your mind are well-known to you and which are still uncharted.",
-                Location::new(295, "kindle://book?action=open&asin=B0049U443Q&location=295"))
-        ])
+                Location::new(295, "kindle://book?action=open&asin=B0049U443Q&location=295"),
+            ),
+        ],
+    )
 }
