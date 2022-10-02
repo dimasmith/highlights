@@ -27,7 +27,17 @@ fn main() {
         Ok(_) => {}
         Err(err) => {
             eprintln!("{}", err);
-            std::process::exit(74);
+            match err {
+                HighlightError::General(_) => {
+                    std::process::exit(70);
+                }
+                HighlightError::IOError(_, _) => {
+                    std::process::exit(74);
+                }
+                HighlightError::InvalidFormat(_, _) => {
+                    std::process::exit(65);
+                }
+            }
         }
     }
 }

@@ -59,7 +59,7 @@ impl From<&JsonHighlight> for Highlight {
 impl HighlightsRead for JsonBook {
     fn from_reader(reader: impl Read) -> Result<Self, HighlightError> {
         let b: JsonBook = serde_json::from_reader(reader).map_err(|e| {
-            HighlightError::new("invalid bookcision json file", std::io::Error::from(e))
+            HighlightError::format("invalid bookcision json file", std::io::Error::from(e))
         })?;
         Ok(b)
     }

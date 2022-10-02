@@ -6,11 +6,16 @@ use std::fmt::{Display, Formatter};
 pub enum HighlightError {
     General(String),
     IOError(String, std::io::Error),
+    InvalidFormat(String, std::io::Error),
 }
 
 impl HighlightError {
-    pub fn new(message: impl Into<String>, io_error: std::io::Error) -> Self {
+    pub fn io(message: impl Into<String>, io_error: std::io::Error) -> Self {
         HighlightError::IOError(message.into(), io_error)
+    }
+
+    pub fn format(message: impl Into<String>, io_error: std::io::Error) -> Self {
+        HighlightError::InvalidFormat(message.into(), io_error)
     }
 }
 
@@ -21,6 +26,9 @@ impl Display for HighlightError {
             HighlightError::IOError(message, err) => {
                 f.write_fmt(format_args!("{}\n\t{}", message, err))
             }
+            HighlightError::InvalidFormat(message, err) => {
+                f.write_fmt(format_args!("{}\n\t{}", message, err))
+            }
         }
     }
 }
@@ -29,6 +37,7 @@ impl Error for HighlightError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             HighlightError::IOError(_, err) => Some(err),
+            HighlightError::InvalidFormat(_, err) => Some(err),
             HighlightError::General(_) => None,
         }
     }

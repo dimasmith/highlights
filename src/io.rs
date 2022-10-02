@@ -9,7 +9,7 @@ pub fn output(out_arg: Option<PathBuf>) -> Result<Box<dyn Write>, HighlightError
         Some(path_buf) => {
             let path = path_buf.as_path();
             let output_file = File::create(path).map_err(|e| {
-                HighlightError::new(format!("cannot write to file: {}", path.display()), e)
+                HighlightError::io(format!("cannot write to file: {}", path.display()), e)
             })?;
             Ok(Box::new(output_file))
         }
@@ -22,7 +22,7 @@ pub fn input(in_arg: Option<PathBuf>) -> Result<Box<dyn Read>, HighlightError> {
         Some(path_buf) => {
             let path = path_buf.as_path();
             let input_file = File::open(path).map_err(|e| {
-                HighlightError::new(format!("cannot read input file: {}", path.display()), e)
+                HighlightError::io(format!("cannot read input file: {}", path.display()), e)
             })?;
             Ok(Box::new(input_file))
         }
