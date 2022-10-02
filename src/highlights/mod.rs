@@ -11,14 +11,24 @@ pub struct Book {
     highlights: Vec<Highlight>,
 }
 
-/// Highlighted passage in the book.
+/// Highlighted part or passage in the book.
 ///
-/// Holds the data on the highlighted passage of the book.
-/// Contains passage text and a link to the original text.
+/// Each passage is always related to some location in the book.
+/// The highlight can have the quote from the original text and readers comment.
 #[derive(Clone, Debug)]
-pub struct Highlight {
-    text: String,
-    location: Location,
+pub enum Highlight {
+    /// Word-by-word quote from the original text.
+    Quote { quote: String, location: Location },
+
+    /// Margin note for the particular book location.
+    Note { note: String, location: Location },
+
+    /// Quote from the book and readers comment on the quote.
+    Comment {
+        quote: String,
+        note: String,
+        location: Location,
+    },
 }
 
 /// Location of highlighted passage.
@@ -39,10 +49,10 @@ impl Book {
     /// let hhgttg = Book::new(
     ///     "The Hitchhikers Guide",
     ///     "Douglas Adams",
-    ///     [Highlight::new(
-    ///         "An ultimate answer is 42",
-    ///         Location::new(42, "https://ultimate.answers.org/42")
-    ///     )]);
+    ///     [Highlight::Quote{
+    ///         quote: "An ultimate answer is 42".to_owned(),
+    ///         location: Location::new(42, "https://ultimate.answers.org/42")
+    ///     }]);
     /// ```
     pub fn new<S, I>(title: S, authors: S, highlights: I) -> Self
     where
@@ -75,23 +85,57 @@ impl Book {
 }
 
 impl Highlight {
-    /// Creates a new highlight with the highlighted text and location.
-    pub fn new<S>(text: S, location: Location) -> Self
+    /// Convenience constructor for note only highlight.
+    pub fn note<S>(note: S, location: Location) -> Self
     where
         S: Into<String>,
     {
-        Highlight {
-            text: text.into(),
+        Highlight::Note {
+            note: note.into(),
             location,
         }
     }
 
-    pub fn text(&self) -> &str {
-        &self.text
+    /// Convenience constructor for quote.
+    pub fn quote<S>(quote: S, location: Location) -> Self
+    where
+        S: Into<String>,
+    {
+        Highlight::Quote {
+            quote: quote.into(),
+            location,
+        }
     }
 
-    pub fn location(&self) -> &Location {
-        &self.location
+    /// Convenience constructor for comment on quote.
+    pub fn comment<S>(quote: S, note: S, location: Location) -> Self
+    where
+        S: Into<String>,
+    {
+        Highlight::Comment {
+            quote: quote.into(),
+            note: note.into(),
+            location,
+        }
+    }
+
+    pub fn location(&self) -> Location {
+        let location = match self {
+            Highlight::Note {
+                note: _,
+                location: l,
+            } => l,
+            Highlight::Quote {
+                quote: _,
+                location: l,
+            } => l,
+            Highlight::Comment {
+                quote: _,
+                note: _,
+                location: l,
+            } => l,
+        };
+        location.clone()
     }
 }
 

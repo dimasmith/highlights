@@ -20,6 +20,8 @@ pub struct JsonBook {
 #[derive(Serialize, Deserialize, Debug)]
 struct JsonHighlight {
     text: String,
+    #[serde(rename = "isNoteOnly")]
+    is_note_only: bool,
     location: JsonHighlightLocation,
     note: Option<String>,
 }
@@ -33,14 +35,24 @@ struct JsonHighlightLocation {
 impl From<JsonBook> for Book {
     /// Convert json representation of highlights into a book.
     fn from(json: JsonBook) -> Self {
-        let highlights = json.highlights.iter().map(|h| {
-            let location = &h.location;
-            Highlight::new(
-                h.text.clone(),
-                Location::new(location.value as usize, location.url.clone()),
-            )
-        });
+        let highlights = json.highlights.iter().map(Highlight::from);
         Book::new(json.title.clone(), json.authors.clone(), highlights)
+    }
+}
+
+impl From<&JsonHighlight> for Highlight {
+    fn from(h: &JsonHighlight) -> Self {
+        let location = Location::new(h.location.value as usize, h.location.url.clone());
+        let quote = h.text.clone();
+        let note = h.note.clone();
+        if h.is_note_only {
+            Highlight::note(note.unwrap(), location)
+        } else {
+            match note {
+                Some(note_text) => Highlight::comment(quote, note_text, location),
+                None => Highlight::quote(quote, location),
+            }
+        }
     }
 }
 
