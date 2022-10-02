@@ -20,7 +20,15 @@ cargo install highlights
 ## Usage
 
 ```shell
-highlights [input] <output>
+Usage: highlights [SOURCE] [TARGET]
+
+Arguments:
+  [SOURCE]  input file
+  [TARGET]  output file
+
+Options:
+  -h, --help     Print help information
+  -V, --version  Print version information
 ```
 
 ### Examples
