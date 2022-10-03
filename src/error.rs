@@ -2,18 +2,24 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
+/// Common error for highlight converter.
 #[derive(Debug)]
 pub enum HighlightError {
+    /// Any error that does not fall in other categories.
     General(String),
+    /// Error related to the IO.
     IOError(String, std::io::Error),
+    /// Broken format of the input highlights.
     InvalidFormat(String, std::io::Error),
 }
 
 impl HighlightError {
+    /// Convenience constructor for the IO error.
     pub fn io(message: impl Into<String>, io_error: std::io::Error) -> Self {
         HighlightError::IOError(message.into(), io_error)
     }
 
+    /// Convenience constructor for the format error.
     pub fn format(message: impl Into<String>, io_error: std::io::Error) -> Self {
         HighlightError::InvalidFormat(message.into(), io_error)
     }
