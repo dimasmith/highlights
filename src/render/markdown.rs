@@ -6,7 +6,21 @@ use crate::highlights::{Book, Highlight};
 use crate::render::Render;
 
 /// Rendering settings for markdown highlight documents.
-pub struct RenderSettings;
+pub struct RenderSettings {
+    split_lines_enabled: bool,
+}
+
+impl RenderSettings {
+    /// Split highlights via horizontal lines.
+    pub fn enable_split_lines(&mut self) {
+        self.split_lines_enabled = true;
+    }
+
+    /// Split highlights via line feeds.
+    pub fn disable_split_lines(&mut self) {
+        self.split_lines_enabled = false;
+    }
+}
 
 /// Renders book highlights to markdown format.
 pub struct MarkdownRenderer {
@@ -30,7 +44,11 @@ impl MarkdownRenderer {
         let highlights = book.highlights();
         for highlight in highlights {
             md.lf()?;
-            md.line()?;
+            if self.render_settings.split_lines_enabled {
+                md.line()?;
+            } else {
+                md.lf()?;
+            }
             match &highlight {
                 Highlight::Quote {
                     quote: quote_text,
@@ -94,7 +112,9 @@ impl Default for MarkdownRenderer {
 
 impl Default for RenderSettings {
     fn default() -> Self {
-        RenderSettings
+        RenderSettings {
+            split_lines_enabled: true,
+        }
     }
 }
 
@@ -142,27 +162,71 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::highlights::examples;
+    mod renderer {
+        use std::io::BufWriter;
 
-    use super::*;
+        use predicates::Predicate;
 
-    #[test]
-    fn render_highlights() {
-        let chess_book = examples::chess_book();
+        use crate::highlights::examples::basic_attributes;
+        use crate::highlights::Book;
+        use crate::render::markdown::{MarkdownRenderer, RenderSettings};
+        use crate::render::Render;
 
-        let markdown = render_markdown(&chess_book);
+        #[test]
+        fn split_highlights_via_horizontal_lines() {
+            let markdown = render_book(RenderSettings::default(), basic_attributes());
 
-        assert!(markdown.contains("# How Life"));
-        assert!(markdown.contains("*by Garry Kasparov*"));
-        assert!(markdown.contains("> the reality is"));
-        assert!(markdown.contains("[Location 157]"));
-        assert!(markdown.contains("Create a personalized map"));
-        assert!(markdown.contains("[Location 294]"));
+            let split_via_lines = predicates::str::contains("---").count(3);
+            assert!(split_via_lines.eval(&markdown));
+
+            assert!(markdown.contains("> Quote_1\n"));
+            assert!(markdown.contains("Note_2\n"));
+            assert!(markdown.contains("> Quote_3\n"));
+            assert!(markdown.contains("Note_3\n"));
+        }
+
+        #[test]
+        fn split_highlights_line_feeds() {
+            let mut settings = RenderSettings::default();
+            settings.disable_split_lines();
+            let markdown = render_book(settings, basic_attributes());
+
+            let split_via_lines = predicates::str::contains("---");
+            assert!(
+                !split_via_lines.eval(&markdown),
+                "highlights must not be split by lines"
+            );
+        }
+
+        fn render_book(render_settings: RenderSettings, book: Book) -> String {
+            let mut renderer = MarkdownRenderer::new(render_settings);
+            let mut output = BufWriter::new(vec![]);
+            renderer.render(&book, &mut output).unwrap();
+            let bytes = output.buffer();
+            String::from_utf8_lossy(bytes).to_string()
+        }
     }
 
-    fn render_markdown(new_book: &Book) -> String {
-        let mut renderer = MarkdownRenderer::default();
-        renderer.as_string(new_book)
+    mod settings {
+        use crate::render::markdown::RenderSettings;
+
+        #[test]
+        fn disable_split_lines() {
+            let mut render_settings = RenderSettings::default();
+
+            render_settings.disable_split_lines();
+
+            assert!(!render_settings.split_lines_enabled);
+        }
+
+        #[test]
+        fn enable_split_lines() {
+            let mut render_settings = RenderSettings::default();
+
+            render_settings.enable_split_lines();
+
+            assert!(render_settings.split_lines_enabled);
+        }
     }
 
     mod markdown_writer {

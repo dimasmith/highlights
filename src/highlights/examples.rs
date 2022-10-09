@@ -23,3 +23,20 @@ pub fn chess_book() -> Book {
         ],
     )
 }
+
+/// Example with basic attributes
+pub fn basic_attributes() -> Book {
+    Book::new(
+        "Title",
+        "Author",
+        [
+            Highlight::quote("Quote_1", Location::new(1, "book://test?location=1")),
+            Highlight::note("Note_2", Location::new(2, "book://test?location=2")),
+            Highlight::comment(
+                "Quote_3",
+                "Note_3",
+                Location::new(3, "book://test?location=3"),
+            ),
+        ],
+    )
+}
