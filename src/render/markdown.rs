@@ -5,16 +5,47 @@ use crate::error::HighlightError;
 use crate::highlights::{Book, Highlight};
 use crate::render::Render;
 
+/// Controls style of rendered quote.
+#[derive(Debug, Copy, Clone)]
+pub enum QuoteStyle {
+    /// Render as blockquote (default).
+    ///
+    /// ## Example
+    ///
+    /// > Lorem ipsum dolor sit amet.
+    BlockQuote,
+    /// Render as italic.
+    ///
+    /// ## Example
+    ///
+    /// *Lorem ipsum dolor sit amet.*
+    Italic,
+    /// Render as plain text.
+    ///
+    /// ## Example
+    ///
+    /// Lorem ipsum dolor sit amet.
+    Plain,
+    /// Render as bold.
+    ///
+    /// ## Example
+    ///
+    /// **Lorem ipsum dolor sit amet.**
+    Bold,
+}
+
 /// Rendering settings for markdown highlight documents.
 #[derive(Debug, Clone)]
 pub struct RenderSettings {
     split_lines_enabled: bool,
+    quote_style: QuoteStyle,
 }
 
 impl RenderSettings {
     pub fn new() -> Self {
         RenderSettings {
             split_lines_enabled: true,
+            quote_style: QuoteStyle::BlockQuote,
         }
     }
     /// Split highlights via horizontal lines.
@@ -26,6 +57,14 @@ impl RenderSettings {
     /// Split highlights via line feeds.
     pub fn disable_split_lines(&mut self) -> &mut RenderSettings {
         self.split_lines_enabled = false;
+        self
+    }
+
+    /// Set style of the quote rendering.
+    ///
+    /// Defaults to blockquote
+    pub fn quote_style(&mut self, style: QuoteStyle) -> &mut RenderSettings {
+        self.quote_style = style;
         self
     }
 
@@ -66,22 +105,22 @@ impl MarkdownRenderer {
                     quote: quote_text,
                     location: _,
                 } => {
-                    md.blockquote(quote_text)?;
+                    self.quote(&mut md, quote_text)?;
                 }
                 Highlight::Note {
                     note: note_text,
                     location: _,
                 } => {
-                    md.text(note_text)?;
+                    self.note(&mut md, note_text)?;
                 }
                 Highlight::Comment {
                     quote: quote_text,
                     note: note_text,
                     location: _,
                 } => {
-                    md.blockquote(quote_text)?;
+                    self.quote(&mut md, quote_text)?;
                     md.lf()?;
-                    md.text(note_text)?;
+                    self.note(&mut md, note_text)?;
                 }
             }
 
@@ -91,6 +130,29 @@ impl MarkdownRenderer {
             md.link(&name, location.link())?;
         }
 
+        Ok(())
+    }
+
+    fn quote(
+        &self,
+        md: &mut MarkdownWriter<impl Write + Sized>,
+        text: &String,
+    ) -> std::io::Result<()> {
+        match self.render_settings.quote_style {
+            QuoteStyle::BlockQuote => md.blockquote(text)?,
+            QuoteStyle::Italic => md.italic(text)?,
+            QuoteStyle::Plain => md.text(text)?,
+            QuoteStyle::Bold => md.bold(text)?,
+        }
+        Ok(())
+    }
+
+    fn note(
+        &self,
+        md: &mut MarkdownWriter<impl Write + Sized>,
+        text: &String,
+    ) -> std::io::Result<()> {
+        md.text(text)?;
         Ok(())
     }
 }
@@ -152,6 +214,10 @@ where
         self.writer.write_fmt(format_args!("{}\n", text))
     }
 
+    fn bold(&mut self, text: &str) -> std::io::Result<()> {
+        self.writer.write_fmt(format_args!("**{}**\n", text))
+    }
+
     fn italic(&mut self, text: &str) -> std::io::Result<()> {
         self.writer.write_fmt(format_args!("*{}*\n", text))
     }
@@ -179,7 +245,7 @@ mod tests {
 
         use crate::highlights::examples::basic_attributes;
         use crate::highlights::Book;
-        use crate::render::markdown::{MarkdownRenderer, RenderSettings};
+        use crate::render::markdown::{MarkdownRenderer, QuoteStyle, RenderSettings};
         use crate::render::Render;
 
         #[test]
@@ -205,6 +271,46 @@ mod tests {
                 !split_via_lines.eval(&markdown),
                 "highlights must not be split by lines"
             );
+        }
+
+        #[test]
+        fn quote_style_blockquote() {
+            let settings = RenderSettings::new()
+                .quote_style(QuoteStyle::BlockQuote)
+                .build();
+            let markdown = render_book(settings, basic_attributes());
+
+            assert!(markdown.contains("> Quote_1"));
+            assert!(markdown.contains("> Quote_3"));
+        }
+
+        #[test]
+        fn quote_style_italic() {
+            let settings = RenderSettings::new()
+                .quote_style(QuoteStyle::Italic)
+                .build();
+            let markdown = render_book(settings, basic_attributes());
+
+            assert!(markdown.contains("*Quote_1*\n"));
+            assert!(markdown.contains("*Quote_3*\n"));
+        }
+
+        #[test]
+        fn quote_style_bold() {
+            let settings = RenderSettings::new().quote_style(QuoteStyle::Bold).build();
+            let markdown = render_book(settings, basic_attributes());
+
+            assert!(markdown.contains("**Quote_1**\n"));
+            assert!(markdown.contains("**Quote_3**\n"));
+        }
+
+        #[test]
+        fn quote_style_plain() {
+            let settings = RenderSettings::new().quote_style(QuoteStyle::Plain).build();
+            let markdown = render_book(settings, basic_attributes());
+
+            assert!(markdown.contains("Quote_1\n"));
+            assert!(markdown.contains("Quote_3\n"));
         }
 
         fn render_book(render_settings: RenderSettings, book: Book) -> String {
