@@ -6,19 +6,31 @@ use crate::highlights::{Book, Highlight};
 use crate::render::Render;
 
 /// Rendering settings for markdown highlight documents.
+#[derive(Debug, Clone)]
 pub struct RenderSettings {
     split_lines_enabled: bool,
 }
 
 impl RenderSettings {
+    pub fn new() -> Self {
+        RenderSettings {
+            split_lines_enabled: true,
+        }
+    }
     /// Split highlights via horizontal lines.
-    pub fn enable_split_lines(&mut self) {
+    pub fn enable_split_lines(&mut self) -> &mut RenderSettings {
         self.split_lines_enabled = true;
+        self
     }
 
     /// Split highlights via line feeds.
-    pub fn disable_split_lines(&mut self) {
+    pub fn disable_split_lines(&mut self) -> &mut RenderSettings {
         self.split_lines_enabled = false;
+        self
+    }
+
+    pub fn build(&self) -> Self {
+        self.clone()
     }
 }
 
@@ -112,9 +124,7 @@ impl Default for MarkdownRenderer {
 
 impl Default for RenderSettings {
     fn default() -> Self {
-        RenderSettings {
-            split_lines_enabled: true,
-        }
+        RenderSettings::new()
     }
 }
 
@@ -187,8 +197,7 @@ mod tests {
 
         #[test]
         fn split_highlights_line_feeds() {
-            let mut settings = RenderSettings::default();
-            settings.disable_split_lines();
+            let settings = RenderSettings::new().disable_split_lines().build();
             let markdown = render_book(settings, basic_attributes());
 
             let split_via_lines = predicates::str::contains("---");

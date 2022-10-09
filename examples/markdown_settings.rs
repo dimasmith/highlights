@@ -6,8 +6,7 @@ use highlights::render::Render;
 
 /// Render markdown highlights with different settings.
 fn main() {
-    let mut render_settings = RenderSettings::default();
-    render_settings.disable_split_lines();
+    let render_settings = RenderSettings::new().disable_split_lines().build();
 
     let mut renderer = MarkdownRenderer::new(render_settings);
     let output = File::create("target/example-settings.md").unwrap();
