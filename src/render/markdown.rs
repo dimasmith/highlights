@@ -34,11 +34,24 @@ pub enum QuoteStyle {
     Bold,
 }
 
+/// Controls style of rendered notes.
+#[derive(Debug, Copy, Clone)]
+pub enum NoteStyle {
+    Plain,
+    Bold,
+    Italic,
+    BlockQuote,
+    /// Renders notes as blockquotes.
+    /// Renders comments as nested blockquotes if quotes are rendered as blockquotes.
+    NestedQuote,
+}
+
 /// Rendering settings for markdown highlight documents.
 #[derive(Debug, Clone)]
 pub struct RenderSettings {
     split_lines_enabled: bool,
     quote_style: QuoteStyle,
+    note_style: NoteStyle,
 }
 
 impl RenderSettings {
@@ -46,6 +59,7 @@ impl RenderSettings {
         RenderSettings {
             split_lines_enabled: true,
             quote_style: QuoteStyle::BlockQuote,
+            note_style: NoteStyle::Plain,
         }
     }
     /// Split highlights via horizontal lines.
@@ -65,6 +79,14 @@ impl RenderSettings {
     /// Defaults to blockquote
     pub fn quote_style(&mut self, style: QuoteStyle) -> &mut RenderSettings {
         self.quote_style = style;
+        self
+    }
+
+    /// Set style of the note rendering.
+    ///
+    /// Defaults to plain
+    pub fn note_style(&mut self, style: NoteStyle) -> &mut RenderSettings {
+        self.note_style = style;
         self
     }
 
@@ -117,11 +139,21 @@ impl MarkdownRenderer {
                     quote: quote_text,
                     note: note_text,
                     location: _,
-                } => {
-                    self.quote(&mut md, quote_text)?;
-                    md.lf()?;
-                    self.note(&mut md, note_text)?;
-                }
+                } => match self.render_settings.note_style {
+                    NoteStyle::NestedQuote => {
+                        self.quote(&mut md, quote_text)?;
+                        match self.render_settings.quote_style {
+                            QuoteStyle::BlockQuote => md.start_blockquote()?,
+                            _ => md.lf()?,
+                        }
+                        self.note(&mut md, note_text)?;
+                    }
+                    _ => {
+                        self.quote(&mut md, quote_text)?;
+                        md.lf()?;
+                        self.note(&mut md, note_text)?;
+                    }
+                },
             }
 
             md.lf()?;
@@ -152,7 +184,12 @@ impl MarkdownRenderer {
         md: &mut MarkdownWriter<impl Write + Sized>,
         text: &String,
     ) -> std::io::Result<()> {
-        md.text(text)?;
+        match self.render_settings.note_style {
+            NoteStyle::Plain => md.text(text)?,
+            NoteStyle::Bold => md.bold(text)?,
+            NoteStyle::Italic => md.italic(text)?,
+            NoteStyle::BlockQuote | NoteStyle::NestedQuote => md.blockquote(text)?,
+        }
         Ok(())
     }
 }
@@ -208,6 +245,10 @@ where
 
     fn blockquote(&mut self, quote: &str) -> std::io::Result<()> {
         self.writer.write_fmt(format_args!("> {}\n", quote))
+    }
+
+    fn start_blockquote(&mut self) -> std::io::Result<()> {
+        self.writer.write_all("> ".as_bytes())
     }
 
     fn text(&mut self, text: &str) -> std::io::Result<()> {
