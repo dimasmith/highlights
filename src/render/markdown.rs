@@ -5,10 +5,20 @@ use crate::error::HighlightError;
 use crate::highlights::{Book, Highlight};
 use crate::render::Render;
 
+/// Rendering settings for markdown highlight documents.
+pub struct RenderSettings;
+
 /// Renders book highlights to markdown format.
-pub struct MarkdownRenderer;
+pub struct MarkdownRenderer {
+    render_settings: RenderSettings,
+}
 
 impl MarkdownRenderer {
+    /// Create renderer with defined render settings.
+    pub fn new(render_settings: RenderSettings) -> Self {
+        MarkdownRenderer { render_settings }
+    }
+
     fn do_render_book(&self, book: &Book, w: impl Write) -> std::io::Result<()> {
         let mut md = MarkdownWriter::new(w);
         md.heading(book.title())?;
@@ -78,7 +88,13 @@ impl Render for MarkdownRenderer {
 
 impl Default for MarkdownRenderer {
     fn default() -> Self {
-        MarkdownRenderer
+        MarkdownRenderer::new(RenderSettings::default())
+    }
+}
+
+impl Default for RenderSettings {
+    fn default() -> Self {
+        RenderSettings
     }
 }
 
