@@ -14,3 +14,8 @@ readme = "README.md"
 serde = { version = "1.0.144", features = ["derive"] }
 serde_json = "1.0.85"
 clap = { version = "4.0.8", features = ["derive"] }
+
+[dev-dependencies]
+assert_cmd = "2.0.4"
+assert_fs = "1.0.7"
+predicates = "2.1.1"
