@@ -5,68 +5,55 @@ use crate::error::HighlightError;
 use crate::highlights::{Book, Highlight};
 use crate::render::Render;
 
-/// Renders the book into markdown format using supplied writer.
-///
-/// Use renderer abstraction where possible.
-///
-/// ## Example
-///
-/// ```
-/// # use std::io::stdout;
-/// # use highlights::highlights::examples;
-/// # use highlights::render::markdown::render_book;
-/// let mut writer = stdout();
-/// let mut book = examples::chess_book();
-/// render_book(&mut book, &mut writer).unwrap();
-/// ```
-/// Produces the markdown output of the example book into the standard output.
-pub fn render_book(book: &Book, w: impl Write) -> std::io::Result<()> {
-    let mut md = MarkdownWriter::new(w);
-    md.heading(book.title())?;
-    md.lf()?;
-    let authors = format_args!("by {}", book.authors()).to_string();
-    md.italic(&authors)?;
-    md.lf()?;
-
-    let highlights = book.highlights();
-    for highlight in highlights {
-        md.lf()?;
-        md.line()?;
-        match &highlight {
-            Highlight::Quote {
-                quote: quote_text,
-                location: _,
-            } => {
-                md.blockquote(quote_text)?;
-            }
-            Highlight::Note {
-                note: note_text,
-                location: _,
-            } => {
-                md.text(note_text)?;
-            }
-            Highlight::Comment {
-                quote: quote_text,
-                note: note_text,
-                location: _,
-            } => {
-                md.blockquote(quote_text)?;
-                md.lf()?;
-                md.text(note_text)?;
-            }
-        }
-
-        md.lf()?;
-        let location = highlight.location();
-        let name = format_args!("Location {}", location.value()).to_string();
-        md.link(&name, location.link())?;
-    }
-
-    Ok(())
-}
-
 /// Renders book highlights to markdown format.
 pub struct MarkdownRenderer;
+
+impl MarkdownRenderer {
+    fn do_render_book(&self, book: &Book, w: impl Write) -> std::io::Result<()> {
+        let mut md = MarkdownWriter::new(w);
+        md.heading(book.title())?;
+        md.lf()?;
+        let authors = format_args!("by {}", book.authors()).to_string();
+        md.italic(&authors)?;
+        md.lf()?;
+
+        let highlights = book.highlights();
+        for highlight in highlights {
+            md.lf()?;
+            md.line()?;
+            match &highlight {
+                Highlight::Quote {
+                    quote: quote_text,
+                    location: _,
+                } => {
+                    md.blockquote(quote_text)?;
+                }
+                Highlight::Note {
+                    note: note_text,
+                    location: _,
+                } => {
+                    md.text(note_text)?;
+                }
+                Highlight::Comment {
+                    quote: quote_text,
+                    note: note_text,
+                    location: _,
+                } => {
+                    md.blockquote(quote_text)?;
+                    md.lf()?;
+                    md.text(note_text)?;
+                }
+            }
+
+            md.lf()?;
+            let location = highlight.location();
+            let name = format_args!("Location {}", location.value()).to_string();
+            md.link(&name, location.link())?;
+        }
+
+        Ok(())
+    }
+}
 
 impl Render for MarkdownRenderer {
     /// Renders highlights to markdown format.
@@ -84,7 +71,8 @@ impl Render for MarkdownRenderer {
     /// renderer.render(&mut book, &mut out).unwrap();
     /// ```
     fn render(&mut self, book: &Book, out: impl Write) -> Result<(), HighlightError> {
-        render_book(book, out).map_err(|e| HighlightError::io("cannot write markdown notes", e))
+        self.do_render_book(book, out)
+            .map_err(|e| HighlightError::io("cannot write markdown notes", e))
     }
 }
 
