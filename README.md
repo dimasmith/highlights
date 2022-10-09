@@ -58,3 +58,9 @@ The highlights are suitable for importing into the Obsidian or similar software 
 A free [bookcision](https://readwise.io/bookcision) service provides a way to export
 kindle highlights to the json file.
 Highlight support those files as an input.
+
+## Samples
+
+You can check resulting formatted highlights in `samples` directory.
+
+- `default_markdown.md` - example of markdown highlights with default formatter;
