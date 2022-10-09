@@ -142,8 +142,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::io::BufWriter;
-
     use crate::highlights::examples;
 
     use super::*;
@@ -167,67 +165,73 @@ mod tests {
         renderer.as_string(new_book)
     }
 
-    #[test]
-    fn render_heading() {
-        let mut buf = BufWriter::new(Vec::new());
-        let mut md = MarkdownWriter::new(&mut buf);
+    mod markdown_writer {
+        use std::io::BufWriter;
 
-        md.heading("Book Title").unwrap();
+        use crate::render::markdown::MarkdownWriter;
 
-        let markdown = stringify(buf);
-        assert_eq!(markdown, "# Book Title\n");
-    }
+        #[test]
+        fn render_heading() {
+            let mut buf = BufWriter::new(Vec::new());
+            let mut md = MarkdownWriter::new(&mut buf);
 
-    #[test]
-    fn render_blockquote() {
-        let mut buf = BufWriter::new(Vec::new());
-        let mut md = MarkdownWriter::new(&mut buf);
+            md.heading("Book Title").unwrap();
 
-        md.blockquote("This is rather nice quote I want to highlight")
-            .unwrap();
+            let markdown = stringify(buf);
+            assert_eq!(markdown, "# Book Title\n");
+        }
 
-        let markdown = stringify(buf);
-        assert_eq!(
-            markdown,
-            "> This is rather nice quote I want to highlight\n"
-        );
-    }
+        #[test]
+        fn render_blockquote() {
+            let mut buf = BufWriter::new(Vec::new());
+            let mut md = MarkdownWriter::new(&mut buf);
 
-    #[test]
-    fn render_text() {
-        let mut buf = BufWriter::new(Vec::new());
-        let mut md = MarkdownWriter::new(&mut buf);
+            md.blockquote("This is rather nice quote I want to highlight")
+                .unwrap();
 
-        md.text("Just a plain text").unwrap();
+            let markdown = stringify(buf);
+            assert_eq!(
+                markdown,
+                "> This is rather nice quote I want to highlight\n"
+            );
+        }
 
-        let markdown = stringify(buf);
-        assert_eq!(markdown, "Just a plain text\n");
-    }
+        #[test]
+        fn render_text() {
+            let mut buf = BufWriter::new(Vec::new());
+            let mut md = MarkdownWriter::new(&mut buf);
 
-    #[test]
-    fn render_line() {
-        let mut buf = BufWriter::new(Vec::new());
-        let mut md = MarkdownWriter::new(&mut buf);
+            md.text("Just a plain text").unwrap();
 
-        md.line().unwrap();
+            let markdown = stringify(buf);
+            assert_eq!(markdown, "Just a plain text\n");
+        }
 
-        let markdown = stringify(buf);
-        assert_eq!(markdown, "---\n");
-    }
+        #[test]
+        fn render_line() {
+            let mut buf = BufWriter::new(Vec::new());
+            let mut md = MarkdownWriter::new(&mut buf);
 
-    #[test]
-    fn render_lf() {
-        let mut buf = BufWriter::new(Vec::new());
-        let mut md = MarkdownWriter::new(&mut buf);
+            md.line().unwrap();
 
-        md.lf().unwrap();
+            let markdown = stringify(buf);
+            assert_eq!(markdown, "---\n");
+        }
 
-        let markdown = stringify(buf);
-        assert_eq!(markdown, "\n");
-    }
+        #[test]
+        fn render_lf() {
+            let mut buf = BufWriter::new(Vec::new());
+            let mut md = MarkdownWriter::new(&mut buf);
 
-    fn stringify(buffer: BufWriter<Vec<u8>>) -> String {
-        let bytes = buffer.into_inner().unwrap();
-        String::from_utf8(bytes).unwrap()
+            md.lf().unwrap();
+
+            let markdown = stringify(buf);
+            assert_eq!(markdown, "\n");
+        }
+
+        fn stringify(buffer: BufWriter<Vec<u8>>) -> String {
+            let bytes = buffer.into_inner().unwrap();
+            String::from_utf8(bytes).unwrap()
+        }
     }
 }
