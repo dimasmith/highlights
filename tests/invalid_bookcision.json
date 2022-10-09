@@ -1,0 +1,34 @@
+{
+  "asin": "c3dd2fe1-0cc9-42d1-b11f-da858a10f1de",
+  "title": "Rustonomicon",
+  "authors": "The Rust Community",
+  "highlights": [
+    {
+      "text": null,
+      "isNoteOnly": false,
+      "location": {
+        "url": "kindle://book?action=open&asin=c3dd2fe1-0cc9-42d1-b11f-da858a10f1de&location=157",
+        "value": 157
+      },
+      "note": null
+    },
+    {
+      "text": "This is an interesting quote from the Rustonomicon",
+      "isNoteOnly": false,
+      "location": {
+        "url": "kindle://book?action=open&asin=c3dd2fe1-0cc9-42d1-b11f-da858a10f1de&location=305",
+        "value": 305
+      },
+      "note": "This quote needs clarification, so that's why the note is here"
+    },
+    {
+      "text": "",
+      "isNoteOnly": true,
+      "location": {
+        "url": "kindle://book?action=open&asin=c3dd2fe1-0cc9-42d1-b11f-da858a10f1de&location=693",
+        "value": 693
+      },
+      "note": "Note to self: don't forget to lint your project."
+    }
+  ]
+}
