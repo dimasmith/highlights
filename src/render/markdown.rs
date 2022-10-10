@@ -179,11 +179,7 @@ impl MarkdownRenderer {
         Ok(())
     }
 
-    fn note(
-        &self,
-        md: &mut MarkdownWriter<impl Write + Sized>,
-        text: &str,
-    ) -> std::io::Result<()> {
+    fn note(&self, md: &mut MarkdownWriter<impl Write + Sized>, text: &str) -> std::io::Result<()> {
         match self.render_settings.note_style {
             NoteStyle::Plain => md.text(text)?,
             NoteStyle::Bold => md.bold(text)?,
