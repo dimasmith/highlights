@@ -59,7 +59,7 @@ impl RenderSettings {
         RenderSettings {
             split_lines_enabled: true,
             quote_style: QuoteStyle::BlockQuote,
-            note_style: NoteStyle::Plain,
+            note_style: NoteStyle::NestedQuote,
         }
     }
     /// Split highlights via horizontal lines.

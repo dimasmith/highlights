@@ -1,6 +1,6 @@
 use std::fs::File;
 
-use highlights::highlights::examples::basic_attributes;
+use highlights::highlights::examples::rustonomicon;
 use highlights::render::markdown::{MarkdownRenderer, NoteStyle, QuoteStyle, RenderSettings};
 use highlights::render::Render;
 
@@ -14,7 +14,7 @@ fn main() {
 
     let mut renderer = MarkdownRenderer::new(render_settings);
     let output = File::create("target/example-settings.md").unwrap();
-    let book = basic_attributes();
+    let book = rustonomicon();
     renderer
         .render(&book, output)
         .expect("cannot render markdown highlights");

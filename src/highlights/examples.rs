@@ -40,3 +40,20 @@ pub fn basic_attributes() -> Book {
         ],
     )
 }
+
+/// Example from imaginary rustonomicon
+pub fn rustonomicon() -> Book {
+    Book::new(
+        "Rustonomicon",
+        "The Rust Community",
+        [
+            Highlight::quote("This is a helpful quote from the Rustonomicon", Location::new(157, "kindle://book?action=open&asin=c3dd2fe1-0cc9-42d1-b11f-da858a10f1de&location=157")),
+            Highlight::note("Note to self: don't forget to lint your project.", Location::new(693, "kindle://book?action=open&asin=c3dd2fe1-0cc9-42d1-b11f-da858a10f1de&location=693")),
+            Highlight::comment(
+                "This is an interesting quote from the Rustonomicon",
+                "This quote needs clarification, so that's why the note is here",
+                Location::new(305, "kindle://book?action=open&asin=c3dd2fe1-0cc9-42d1-b11f-da858a10f1de&location=305"),
+            ),
+        ],
+    )
+}
