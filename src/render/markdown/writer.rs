@@ -1,3 +1,4 @@
+use std::fmt::Arguments;
 use std::io::Write;
 
 pub struct MarkdownWriter<W> {
@@ -12,33 +13,42 @@ where
         MarkdownWriter { writer }
     }
 
-    pub fn heading(&mut self, title: &str) -> std::io::Result<()> {
-        self.writer.write_fmt(format_args!("# {}\n", title))
+    pub fn heading(&mut self, title: &str) -> std::io::Result<&mut Self> {
+        self.write_fmt(format_args!("# {}\n", title))
     }
 
-    pub fn blockquote(&mut self, quote: &str) -> std::io::Result<()> {
-        self.writer.write_fmt(format_args!("> {}\n", quote))
+    pub fn blockquote(&mut self, quote: &str) -> std::io::Result<&mut Self> {
+        self.write_fmt(format_args!("> {}\n", quote))
     }
 
-    pub fn text(&mut self, text: &str) -> std::io::Result<()> {
-        self.writer.write_fmt(format_args!("{}\n", text))
+    pub fn text(&mut self, text: &str) -> std::io::Result<&mut Self> {
+        self.write_fmt(format_args!("{}\n", text))
     }
 
-    pub fn italic(&mut self, text: &str) -> std::io::Result<()> {
-        self.writer.write_fmt(format_args!("*{}*\n", text))
+    pub fn italic(&mut self, text: &str) -> std::io::Result<&mut Self> {
+        self.write_fmt(format_args!("*{}*\n", text))
     }
 
-    pub fn link(&mut self, title: &str, url: &str) -> std::io::Result<()> {
-        self.writer
-            .write_fmt(format_args!("[{}]({})\n", title, url))
+    pub fn link(&mut self, title: &str, url: &str) -> std::io::Result<&mut Self> {
+        self.write_fmt(format_args!("[{}]({})\n", title, url))
     }
 
-    pub fn line(&mut self) -> std::io::Result<()> {
-        self.writer.write_all("---\n".as_bytes())
+    pub fn line(&mut self) -> std::io::Result<&mut Self> {
+        self.write_all("---\n")
     }
 
-    pub fn lf(&mut self) -> std::io::Result<()> {
-        self.writer.write_all("\n".as_bytes())
+    pub fn lf(&mut self) -> std::io::Result<&mut Self> {
+        self.write_all("\n")
+    }
+
+    fn write_fmt(&mut self, fmt: Arguments) -> std::io::Result<&mut Self> {
+        self.writer.write_fmt(fmt)?;
+        Ok(self)
+    }
+
+    fn write_all(&mut self, buf: &str) -> std::io::Result<&mut Self> {
+        self.writer.write_all(buf.as_bytes())?;
+        Ok(self)
     }
 }
 

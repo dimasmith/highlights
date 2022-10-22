@@ -25,16 +25,13 @@ mod writer;
 /// Produces the markdown output of the example book into the standard output.
 pub fn render_book(book: &Book, w: impl Write) -> std::io::Result<()> {
     let mut md = MarkdownWriter::new(w);
-    md.heading(book.title())?;
-    md.lf()?;
+    md.heading(book.title())?.lf()?;
     let authors = format_args!("by {}", book.authors()).to_string();
-    md.italic(&authors)?;
-    md.lf()?;
+    md.italic(&authors)?.lf()?;
 
     let highlights = book.highlights();
     for highlight in highlights {
-        md.lf()?;
-        md.line()?;
+        md.lf()?.line()?;
         match &highlight {
             Highlight::Quote {
                 quote: quote_text,
@@ -99,22 +96,74 @@ impl Default for MarkdownRenderer {
 
 #[cfg(test)]
 mod tests {
-    use crate::highlights::examples;
-
     use super::*;
+    use crate::highlights::Location;
 
     #[test]
-    fn render_highlights() {
-        let chess_book = examples::chess_book();
+    fn render_title() {
+        let book = Book::new("Title", "Author", []);
 
-        let markdown = render_markdown(&chess_book);
+        let markdown = render_markdown(&book);
+        let lines: Vec<&str> = markdown.lines().collect();
 
-        assert!(markdown.contains("# How Life"));
-        assert!(markdown.contains("*by Garry Kasparov*"));
-        assert!(markdown.contains("> the reality is"));
-        assert!(markdown.contains("[Location 157]"));
-        assert!(markdown.contains("Create a personalized map"));
-        assert!(markdown.contains("[Location 294]"));
+        assert!(lines.contains(&"# Title"));
+        assert!(lines.contains(&"*by Author*"));
+    }
+
+    #[test]
+    fn render_quote() {
+        let book = Book::new(
+            "Title",
+            "Author",
+            [Highlight::quote(
+                "Quote",
+                Location::new(1, "http://book.org/quotes/1"),
+            )],
+        );
+
+        let markdown = render_markdown(&book);
+        let lines: Vec<&str> = markdown.lines().collect();
+
+        assert!(lines.contains(&"> Quote"));
+        assert!(lines.contains(&"[Location 1](http://book.org/quotes/1)"));
+    }
+
+    #[test]
+    fn render_note() {
+        let book = Book::new(
+            "Title",
+            "Author",
+            [Highlight::note(
+                "Note",
+                Location::new(1, "http://book.org/notes/1"),
+            )],
+        );
+
+        let markdown = render_markdown(&book);
+        let lines: Vec<&str> = markdown.lines().collect();
+
+        assert!(lines.contains(&"Note"));
+        assert!(lines.contains(&"[Location 1](http://book.org/notes/1)"));
+    }
+
+    #[test]
+    fn render_comment() {
+        let book = Book::new(
+            "Title",
+            "Author",
+            [Highlight::comment(
+                "Quote",
+                "Note",
+                Location::new(1, "http://book.org/comments/1"),
+            )],
+        );
+
+        let markdown = render_markdown(&book);
+        let lines: Vec<&str> = markdown.lines().collect();
+
+        assert!(lines.contains(&"> Quote"));
+        assert!(lines.contains(&"Note"));
+        assert!(lines.contains(&"[Location 1](http://book.org/comments/1)"));
     }
 
     fn render_markdown(new_book: &Book) -> String {
