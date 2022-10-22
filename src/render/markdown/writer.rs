@@ -14,31 +14,36 @@ where
     }
 
     pub fn heading(&mut self, title: &str) -> std::io::Result<&mut Self> {
-        self.write_fmt(format_args!("# {}\n", title))
+        self.write_fmt(format_args!("# {}", title))
     }
 
     pub fn blockquote(&mut self, quote: &str) -> std::io::Result<&mut Self> {
-        self.write_fmt(format_args!("> {}\n", quote))
+        self.write_fmt(format_args!("> {}", quote))
     }
 
     pub fn text(&mut self, text: &str) -> std::io::Result<&mut Self> {
-        self.write_fmt(format_args!("{}\n", text))
+        self.write_fmt(format_args!("{}", text))
     }
 
     pub fn italic(&mut self, text: &str) -> std::io::Result<&mut Self> {
-        self.write_fmt(format_args!("*{}*\n", text))
+        self.write_fmt(format_args!("*{}*", text))
     }
 
     pub fn link(&mut self, title: &str, url: &str) -> std::io::Result<&mut Self> {
-        self.write_fmt(format_args!("[{}]({})\n", title, url))
+        self.write_fmt(format_args!("[{}]({})", title, url))
     }
 
     pub fn line(&mut self) -> std::io::Result<&mut Self> {
-        self.write_all("---\n")
+        self.write_all("---")
     }
 
+    #[allow(dead_code)]
     pub fn lf(&mut self) -> std::io::Result<&mut Self> {
         self.write_all("\n")
+    }
+
+    pub fn end_block(&mut self) -> std::io::Result<&mut Self> {
+        self.write_all("\n\n")
     }
 
     fn write_fmt(&mut self, fmt: Arguments) -> std::io::Result<&mut Self> {
@@ -65,7 +70,7 @@ mod tests {
         md.heading("Book Title").unwrap();
 
         let markdown = stringify(buf);
-        assert_eq!(markdown, "# Book Title\n");
+        assert_eq!(markdown, "# Book Title");
     }
 
     #[test]
@@ -77,10 +82,7 @@ mod tests {
             .unwrap();
 
         let markdown = stringify(buf);
-        assert_eq!(
-            markdown,
-            "> This is rather nice quote I want to highlight\n"
-        );
+        assert_eq!(markdown, "> This is rather nice quote I want to highlight");
     }
 
     #[test]
@@ -91,7 +93,7 @@ mod tests {
         md.text("Just a plain text").unwrap();
 
         let markdown = stringify(buf);
-        assert_eq!(markdown, "Just a plain text\n");
+        assert_eq!(markdown, "Just a plain text");
     }
 
     #[test]
@@ -102,7 +104,7 @@ mod tests {
         md.line().unwrap();
 
         let markdown = stringify(buf);
-        assert_eq!(markdown, "---\n");
+        assert_eq!(markdown, "---");
     }
 
     #[test]

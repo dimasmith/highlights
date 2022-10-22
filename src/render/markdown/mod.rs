@@ -25,41 +25,39 @@ mod writer;
 /// Produces the markdown output of the example book into the standard output.
 pub fn render_book(book: &Book, w: impl Write) -> std::io::Result<()> {
     let mut md = MarkdownWriter::new(w);
-    md.heading(book.title())?.lf()?;
+    md.heading(book.title())?.end_block()?;
     let authors = format_args!("by {}", book.authors()).to_string();
-    md.italic(&authors)?.lf()?;
+    md.italic(&authors)?.end_block()?;
 
     let highlights = book.highlights();
     for highlight in highlights {
-        md.lf()?.line()?;
+        md.line()?.lf()?;
         match &highlight {
             Highlight::Quote {
                 quote: quote_text,
                 location: _,
             } => {
-                md.blockquote(quote_text)?;
+                md.blockquote(quote_text)?.end_block()?;
             }
             Highlight::Note {
                 note: note_text,
                 location: _,
             } => {
-                md.text(note_text)?;
+                md.text(note_text)?.end_block()?;
             }
             Highlight::Comment {
                 quote: quote_text,
                 note: note_text,
                 location: _,
             } => {
-                md.blockquote(quote_text)?;
-                md.lf()?;
-                md.text(note_text)?;
+                md.blockquote(quote_text)?.end_block()?;
+                md.text(note_text)?.end_block()?;
             }
         }
 
-        md.lf()?;
         let location = highlight.location();
         let name = format_args!("Location {}", location.value()).to_string();
-        md.link(&name, location.link())?;
+        md.link(&name, location.link())?.end_block()?;
     }
 
     Ok(())
